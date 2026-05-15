@@ -8,7 +8,7 @@
     NSUInteger dataLength = [tokenData length];
     NSMutableString *hexString = [NSMutableString stringWithCapacity:(dataLength * 2)];
     for (int i = 0; i < dataLength; ++i) {
-        [hexString appendFormat:@"%02x", dataBuffer[i]];
+        [hexString appendFormat:"%02x", dataBuffer[i]];
     }
     return [hexString copy];
 }
@@ -17,7 +17,7 @@
 - (void)saveTokenData:(NSData *)tokenData withKey:(NSString *)key {
     if (tokenData) {
         [[NSUserDefaults standardUserDefaults] setObject:tokenData forKey:key];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        // Removed synchronize for modern iOS versions
     }
 }
 
@@ -25,6 +25,9 @@
 - (NSInteger)writeTokenData:(NSData *)tokenData toStream:(NSOutputStream *)outputStream {
     if ([outputStream hasSpaceAvailable]) {
         NSInteger bytesWritten = [outputStream write:[tokenData bytes] maxLength:[tokenData length]];
+        if (bytesWritten < 0) {
+            NSLog(@"Error writing to stream: %@", [outputStream streamError]);
+        }
         return bytesWritten;
     }
     return -1;
